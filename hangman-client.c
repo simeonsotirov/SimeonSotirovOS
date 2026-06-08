@@ -83,7 +83,6 @@ int main(int argc, char *argv[])
     rbuf_t rd;
     rbuf_init(&rd, sock);
 
-    /* Handshake: expect ACCEPT or REJECT */
     char resp[64];
     if (rbuf_getline(&rd, resp, sizeof(resp)) < 0 || strcmp(resp, "ACCEPT") != 0) {
         fprintf(stderr, "Server rejected word: %s\n", resp);
@@ -91,7 +90,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* Game loop: each turn is one pipe-delimited line: <masked>|<incorrect> */
     char state[512];
     for (;;) {
         if (rbuf_getline(&rd, state, sizeof(state)) < 0) break;
@@ -115,7 +113,6 @@ int main(int argc, char *argv[])
         sock_send(sock, msg);
     }
 
-    /* End of game: one pipe-delimited line: <WIN|LOSE|TIE>|<my_inc>|<opp_inc> */
     char result_line[512];
     if (rbuf_getline(&rd, result_line, sizeof(result_line)) < 0) goto bye;
 
