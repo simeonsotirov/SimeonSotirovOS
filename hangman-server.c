@@ -47,7 +47,6 @@ static void build_csv(letter_set_t set, char *out, size_t cap)
     out[pos] = '\0';
 }
 
-/* Send state as a single pipe-delimited line: <masked>|<incorrect>\n */
 static void push_state(int fd, const secret_word_t *w)
 {
     char masked[256];
@@ -86,7 +85,6 @@ static void *player_thread(void *vp)
         push_state(fd, sw);
     }
 
-    /* Semaphore barrier: second arrival unlocks both. */
     pthread_mutex_lock(&sess->arrive_lock);
     int count = ++sess->arrived;
     pthread_mutex_unlock(&sess->arrive_lock);
@@ -109,7 +107,6 @@ static void *player_thread(void *vp)
     build_csv(sess->words[1 - me].incorrect_guesses, my_inc,  sizeof(my_inc));
     build_csv(sess->words[me].incorrect_guesses,     opp_inc, sizeof(opp_inc));
 
-    /* Send result as a single pipe-delimited line: <result>|<my_inc>|<opp_inc>\n */
     char pkt[512];
     int  plen = snprintf(pkt, sizeof(pkt), "%s|%s|%s\n", result, my_inc, opp_inc);
     write(fd, pkt, (size_t)plen);
